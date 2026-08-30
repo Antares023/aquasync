@@ -51,15 +51,15 @@
 
 ```mermaid
 graph TD
-    A[User Registrasi Akun Baru] --> B[Kirim Email Verifikasi Firebase]
-    B --> C[Status DB: pending | email_verified: false]
-    C --> D{User Klik Link Verifikasi?}
-    D -- Tidak (>24 Jam) --> E[Auto-Cleanup Hapus Akun]
-    D -- Ya --> F[email_verified: true | Status: pending]
-    F --> G[Halaman PendingState: Menunggu Admin]
-    G --> H{Persetujuan Master Admin}
-    H -- Tolak --> I[Hapus Akun & Perangkat]
-    H -- Setujui --> J[Status: approved -> Akses Penuh PWA]
+    A["User Registrasi Akun Baru"] --> B["Kirim Email Verifikasi Firebase"]
+    B --> C["Status DB: pending & email_verified: false"]
+    C --> D{"User Klik Link Verifikasi?"}
+    D -- "Tidak (>24 Jam)" --> E["Auto-Cleanup Hapus Akun"]
+    D -- "Ya" --> F["email_verified: true & Status: pending"]
+    F --> G["Halaman PendingState: Menunggu Admin"]
+    G --> H{"Persetujuan Master Admin"}
+    H -- "Tolak" --> I["Hapus Akun & Perangkat"]
+    H -- "Setujui" --> J["Status: approved & Akses Penuh PWA"]
 ```
 
 ---
@@ -98,16 +98,21 @@ npm install
 ```
 
 ### 4. Konfigurasi Environment (`.env`)
-Buat file `.env` di root folder proyek dan salin kredensial proyek Firebase Anda:
+Salin file `.env.example` menjadi `.env` lalu ganti nilai variabel dengan kredensial proyek Firebase Anda:
 
+```bash
+cp .env.example .env
+```
+
+Isi file `.env`:
 ```env
-VITE_FIREBASE_API_KEY=AIzaSyxxxxxxxxxxxxxxxxxxxxxxx
-VITE_FIREBASE_AUTH_DOMAIN=aquasync-xxxx.firebaseapp.com
-VITE_FIREBASE_DATABASE_URL=https://aquasync-xxxx-default-rtdb.asia-southeast1.firebasedatabase.app
-VITE_FIREBASE_PROJECT_ID=aquasync-xxxx
-VITE_FIREBASE_STORAGE_BUCKET=aquasync-xxxx.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
-VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+VITE_FIREBASE_DATABASE_URL=https://your_project_id-default-rtdb.firebaseio.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
 ```
 
 ### 5. Deployment Rules Firebase Realtime Database
