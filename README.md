@@ -47,23 +47,6 @@
 
 ---
 
-## 🏗️ Arsitektur Alur Autentikasi & Keamanan
-
-```mermaid
-graph TD
-    A["User Registrasi Akun Baru"] --> B["Kirim Email Verifikasi Firebase"]
-    B --> C["Status DB: pending & email_verified: false"]
-    C --> D{"User Klik Link Verifikasi?"}
-    D -- "Tidak (>24 Jam)" --> E["Auto-Cleanup Hapus Akun"]
-    D -- "Ya" --> F["email_verified: true & Status: pending"]
-    F --> G["Halaman PendingState: Menunggu Admin"]
-    G --> H{"Persetujuan Master Admin"}
-    H -- "Tolak" --> I["Hapus Akun & Perangkat"]
-    H -- "Setujui" --> J["Status: approved & Akses Penuh PWA"]
-```
-
----
-
 ## 🛠️ Teknologi & Dependensi
 
 | Kategori | Teknologi | Deskripsi |
@@ -127,49 +110,6 @@ Buka browser di `http://localhost:5173`.
 ### 7. Build Produksi
 ```bash
 npm run build
-```
-
----
-
-## 🗄️ Struktur Realtime Database Firebase
-
-```json
-{
-  "users": {
-    "$uid": {
-      "email": "user@gmail.com",
-      "name": "Nama User",
-      "phone": "08123456789",
-      "institution": "Kolam Blok A",
-      "role": "user", // "master_admin" | "user"
-      "status": "approved", // "pending" | "approved"
-      "email_verified": true,
-      "created_at": 1740000000000
-    }
-  },
-  "devices": {
-    "$deviceId": {
-      "owner_uid": "$uid",
-      "name": "Kolam Nila Utama",
-      "last_updated": 1740000000000,
-      "sensor_data": {
-        "ntu": 18.5
-      },
-      "settings": {
-        "threshold_jernih": 25,
-        "threshold_agak_keruh": 45,
-        "threshold_keruh": 65,
-        "threshold_sangat_keruh": 85
-      },
-      "controls": {
-        "mode": "auto",
-        "pump_filter": false,
-        "drain_valve": false,
-        "reset_wifi": false
-      }
-    }
-  }
-}
 ```
 
 ---
