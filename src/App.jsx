@@ -57,12 +57,18 @@ function GlobalBottomNav() {
     ];
   }
 
-  const activeIndex = navConfig.findIndex(item => item.path === location.pathname);
+  let activeIndex = navConfig.findIndex(item => {
+    if (item.path === '/') return location.pathname === '/';
+    if (item.path === '/devices' && location.pathname.startsWith('/device/')) return true;
+    return location.pathname.startsWith(item.path);
+  });
+
+  if (activeIndex === -1) activeIndex = 0;
 
   return (
     <div className="smooth-bottom-nav">
       <div className="nav-bg-clipper">
-        <div className="nav-bg-slider" style={{ '--active-index': activeIndex >= 0 ? activeIndex : 0 }}>
+        <div className="nav-bg-slider" style={{ '--active-index': activeIndex }}>
           <svg viewBox="0 0 100 70" preserveAspectRatio="none">
             <path d="M0,0 C20,0 20,45 50,45 C80,45 80,0 100,0 L100,70 L0,70 Z" fill="white" />
           </svg>
@@ -71,7 +77,7 @@ function GlobalBottomNav() {
       <div className="nav-items">
         {navConfig.map((item, index) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+          const isActive = index === activeIndex;
           return (
             <Link key={index} to={item.path} className={`nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-frame">
