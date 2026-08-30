@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Fish, Droplets, ShieldCheck, Activity, ChevronRight, LogIn } from 'lucide-react';
+import { Fish, Droplets, ShieldCheck, Activity, ChevronRight, LogIn, Beaker } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 function LandingPage() {
@@ -32,13 +32,13 @@ function LandingPage() {
       {/* Hero Section */}
       <section style={{ padding: '2.5rem 5% 2rem 5%', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }} className="animate-fade-up">
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(12, 74, 110, 0.08)', padding: '0.35rem 0.9rem', borderRadius: '2rem', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600, marginBottom: '1.25rem' }}>
-          <Activity size={15} /> Pemantauan Kejernihan Air Kolam Real-time
+          <Activity size={15} /> Pemantauan Kekeruhan Air Real-time (NTU)
         </div>
         <h1 className="title-gradient" style={{ fontSize: 'clamp(1.6rem, 5vw, 2.8rem)', fontWeight: 900, lineHeight: 1.2, marginBottom: '1rem' }}>
           Jaga Kualitas Air Kolam Nila Anda Secara Otomatis
         </h1>
         <p style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)', color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: '1.75rem' }}>
-          Sistem pemantauan sensor kekeruhan air (NTU) terintegrasi IoT dengan klasifikasi kejernihan 4 level, kontrol aktuator otomatis, dan laporan PDF resmi untuk budidaya ikan nila yang optimal.
+          Sistem pemantauan kekeruhan air (NTU) terintegrasi IoT dengan 4 tingkat klasifikasi kejernihan, otomatisasi penyuntikan cairan penjernih PAC (Poly Aluminium Chloride), dan laporan PDF resmi untuk budidaya ikan nila yang optimal.
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
@@ -68,7 +68,15 @@ function LandingPage() {
               <Droplets size={24} color="var(--primary)" />
             </div>
             <h3 style={{ fontSize: '0.95rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>Sensor NTU Real-time</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>Pantau kekeruhan air kolam secara presisi detik demi detik dari smartphone Anda.</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>Pantau kekeruhan air kolam (NTU) dengan klasifikasi 4 level kejernihan air secara presisi.</p>
+          </div>
+
+          <div className="glass-card" style={{ textAlign: 'center', padding: '1.25rem 1rem' }}>
+            <div style={{ background: 'rgba(12, 74, 110, 0.08)', width: '46px', height: '46px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.8rem auto' }}>
+              <Beaker size={24} color="var(--primary)" />
+            </div>
+            <h3 style={{ fontSize: '0.95rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>Dosing PAC Otomatis</h3>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>Sistem otomatisasi penambahan cairan penjernih PAC (Poly Aluminium Chloride) untuk menjernihkan air.</p>
           </div>
 
           <div className="glass-card" style={{ textAlign: 'center', padding: '1.25rem 1rem' }}>
@@ -76,23 +84,15 @@ function LandingPage() {
               <Activity size={24} color="var(--primary)" />
             </div>
             <h3 style={{ fontSize: '0.95rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>Grafik & Laporan PDF</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>Grafik riwayat historis dan unduh laporan kualitas air berbentuk dokumen PDF resmi.</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>Grafik riwayat historis kekeruhan air dan fitur cetak dokumen laporan resmi berbentuk PDF.</p>
           </div>
 
           <div className="glass-card" style={{ textAlign: 'center', padding: '1.25rem 1rem' }}>
             <div style={{ background: 'rgba(12, 74, 110, 0.08)', width: '46px', height: '46px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.8rem auto' }}>
               <ShieldCheck size={24} color="var(--primary)" />
             </div>
-            <h3 style={{ fontSize: '0.95rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>Keamanan Terjamin</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>Verifikasi email 24 jam & persetujuan admin memastikan hanya user sah yang terhubung.</p>
-          </div>
-
-          <div className="glass-card" style={{ textAlign: 'center', padding: '1.25rem 1rem' }}>
-            <div style={{ background: 'rgba(12, 74, 110, 0.08)', width: '46px', height: '46px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.8rem auto' }}>
-              <Fish size={24} color="var(--primary)" />
-            </div>
-            <h3 style={{ fontSize: '0.95rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>Manajemen Kolam</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>Kelola multiple alat & lokasi kolam dalam satu dasbor terpadu.</p>
+            <h3 style={{ fontSize: '0.95rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>Keamanan 3-Lapis</h3>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>Verifikasi email 24 jam & persetujuan admin memastikan hanya akun pengguna yang sah yang terhubung.</p>
           </div>
         </div>
       </section>
