@@ -28,8 +28,7 @@
   - 🔴 **Sangat Keruh**: `≥ 65 NTU` *(Perlu pengurasan dasar kolam)*
 - ⚙️ **Pengaturan Ambang Batas Dinamis**: User dapat secara bebas menentukan dan menyimpan batas NTU untuk masing-masing dari 4 klasifikasi.
 - 🎛️ **Kontrol Aktuator Kolam**:
-  - Sakelar **Pompa Filter Sirkulasi** (ON/OFF).
-  - Sakelar **Katup Drain / Pengurasan** (OPEN/CLOSE).
+  - Sakelar **Pompa Dosing PAC (Bahan Penjernih)** (ON/OFF) untuk penambahan cairan Poly Aluminium Chloride.
   - Mode Operasional **Otomatis (ESP32)** vs **Manual User**.
 - 🛡️ **Keamanan Terverifikasi 3-Lapis**:
   1. *Autentikasi Firebase Email & Password*.
@@ -163,8 +162,7 @@ npm run build
       },
       "controls": {
         "mode": "auto",
-        "pump_filter": false,
-        "drain_valve": false,
+        "pump_pac": false,
         "reset_wifi": false
       }
     }

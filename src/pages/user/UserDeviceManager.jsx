@@ -66,8 +66,7 @@ function UserDeviceManager() {
         },
         controls: {
           mode: 'auto',
-          pump_filter: false,
-          drain_valve: false,
+          pump_pac: false,
           reset_wifi: false
         }
       });

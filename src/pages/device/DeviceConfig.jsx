@@ -3,7 +3,7 @@ import { ref, onValue, set } from 'firebase/database';
 import { database } from '../../firebase';
 import { useParams, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { ArrowLeft, Save, SlidersHorizontal, Settings as SettingsIcon, Power, Droplets, Wifi } from 'lucide-react';
+import { ArrowLeft, Save, SlidersHorizontal, Settings as SettingsIcon, Power, Droplets, Wifi, Beaker } from 'lucide-react';
 
 function DeviceConfig() {
   const { deviceId } = useParams();
@@ -11,7 +11,8 @@ function DeviceConfig() {
     threshold_jernih: 25,
     threshold_agak_keruh: 45,
     threshold_keruh: 65,
-    threshold_sangat_keruh: 85
+    threshold_sangat_keruh: 85,
+    pac_dosing_duration: 5
   });
 
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,7 @@ function DeviceConfig() {
     const confirm = await Swal.fire({
       ...swalConfig,
       title: 'Simpan Ambang Batas?',
-      text: 'Apakah Anda yakin ingin mengubah ambang batas klasifikasi kejernihan air (NTU) untuk alat ini?',
+      text: 'Apakah Anda yakin ingin mengubah ambang batas kekeruhan air (NTU) & durasi dosing PAC?',
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Ya, Simpan',
@@ -64,9 +65,10 @@ function DeviceConfig() {
         threshold_jernih: Number(settings.threshold_jernih || 25),
         threshold_agak_keruh: Number(settings.threshold_agak_keruh || 45),
         threshold_keruh: Number(settings.threshold_keruh || 65),
-        threshold_sangat_keruh: Number(settings.threshold_sangat_keruh || 85)
+        threshold_sangat_keruh: Number(settings.threshold_sangat_keruh || 85),
+        pac_dosing_duration: Number(settings.pac_dosing_duration || 5)
       });
-      Swal.fire({ ...swalConfig, title: 'Tersimpan!', text: 'Ambang batas kejernihan air berhasil diperbarui.', icon: 'success', timer: 1500, showConfirmButton: false });
+      Swal.fire({ ...swalConfig, title: 'Tersimpan!', text: 'Konfigurasi ambang batas & dosing PAC berhasil diperbarui.', icon: 'success', timer: 1500, showConfirmButton: false });
     } catch (err) {
       Swal.fire({ ...swalConfig, title: 'Gagal', text: err.message, icon: 'error' });
     }
@@ -139,21 +141,21 @@ function DeviceConfig() {
           className={activeTab === 'kontrol' ? 'btn-3d' : ''}
           style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'kontrol' ? 'white' : 'var(--text-main)', background: activeTab === 'kontrol' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center' }}
         >
-          <SlidersHorizontal size={16} /> Kontrol Aktuator
+          <SlidersHorizontal size={16} /> Kontrol Dosing PAC
         </button>
         <button
           onClick={() => setActiveTab('konfigurasi')}
           className={activeTab === 'konfigurasi' ? 'btn-3d' : ''}
           style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'konfigurasi' ? 'white' : 'var(--text-main)', background: activeTab === 'konfigurasi' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center' }}
         >
-          <SettingsIcon size={16} /> Ambang Batas Klasifikasi
+          <SettingsIcon size={16} /> Ambang Batas & Durasi
         </button>
       </div>
 
       {activeTab === 'kontrol' && controls && (
         <div style={{ marginTop: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.75rem' }}>
-            <h3 className="title-gradient" style={{ fontSize: '1.2rem', margin: 0 }}>Mode Kontrol Kolam</h3>
+            <h3 className="title-gradient" style={{ fontSize: '1.2rem', margin: 0 }}>Mode Operasional Alat</h3>
 
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
@@ -176,38 +178,31 @@ function DeviceConfig() {
           {controls.mode === 'auto' ? (
             <div className="glass-card" style={{ padding: '1.25rem', borderLeft: '4px solid var(--primary)', background: 'rgba(12, 74, 110, 0.04)' }}>
               <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                <strong>Mode Otomatis Aktif.</strong> Pompa filter & katup pengurasan dikendalikan secara otomatis oleh mikrokontroler ESP32 berdasarkan ambang batas kekeruhan (NTU) yang dikonfigurasi.
+                <strong>Mode Otomatis Aktif.</strong> Pompa dosing PAC akan menyuntikkan cairan penjernih air secara otomatis jika kekeruhan air (NTU) melampaui ambang batas.
               </p>
             </div>
           ) : (
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
               <div style={{ background: 'rgba(234, 179, 8, 0.1)', borderLeft: '4px solid #eab308', padding: '1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                <strong>Peringatan Manual:</strong> Anda memegang kendali penuh atas aktuator kolam.
+                <strong>Peringatan Mode Manual:</strong> Anda dapat menyalakan/mematikan pompa penambahan cairan penjernih PAC secara langsung.
               </div>
 
-              <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.2rem' }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Pompa Filter Sirkulasi</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Menyaring air kolam dari kotoran & lumut</div>
+              {/* Single Control: Pompa Dosing PAC */}
+              <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                  <div style={{ background: 'rgba(12, 74, 110, 0.1)', padding: '0.6rem', borderRadius: '50%' }}>
+                    <Beaker size={24} color="var(--primary)" />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Pompa Dosing PAC</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Memasukkan cairan penjernih air (Poly Aluminium Chloride)</div>
+                  </div>
                 </div>
                 <button
-                  onClick={() => toggleControlField('pump_filter')}
-                  className={controls.pump_filter ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
+                  onClick={() => toggleControlField('pump_pac')}
+                  className={controls.pump_pac ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                 >
-                  <Power size={16} /> {controls.pump_filter ? 'ON' : 'OFF'}
-                </button>
-              </div>
-
-              <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.2rem' }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Katup Drain / Pengurasan</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Membuka katup buang air dasar kolam</div>
-                </div>
-                <button
-                  onClick={() => toggleControlField('drain_valve')}
-                  className={controls.drain_valve ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
-                >
-                  <Power size={16} /> {controls.drain_valve ? 'OPEN' : 'CLOSE'}
+                  <Power size={16} /> {controls.pump_pac ? 'ON' : 'OFF'}
                 </button>
               </div>
             </div>
@@ -226,7 +221,7 @@ function DeviceConfig() {
                 Tentukan nilai ambang batas NTU untuk menentukan 4 tingkat klasifikasi kejernihan air:
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: '#10b981', marginBottom: '0.5rem', fontWeight: 700 }}>
                     🟢 Jernih (≤ NTU)
@@ -279,10 +274,24 @@ function DeviceConfig() {
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Default: 85 NTU</div>
                 </div>
               </div>
+
+              {/* Durasi Dosing PAC */}
+              <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '1rem' }}>
+                <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Beaker size={16} color="var(--primary)" /> Durasi Dosing Cairan PAC (Detik)
+                </h4>
+                <input
+                  type="number" min="1" max="60"
+                  value={settings.pac_dosing_duration}
+                  onChange={(e) => setSettings({ ...settings, pac_dosing_duration: e.target.value })}
+                  placeholder="misal: 5"
+                />
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Lama pompa PAC menyala setiap kali melakukan penambahan cairan penjernih.</div>
+              </div>
             </div>
 
             <button type="submit" disabled={loading} className="btn-3d" style={{ padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-              <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Ambang Batas'}
+              <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Ambang Batas & Durasi'}
             </button>
           </form>
 
