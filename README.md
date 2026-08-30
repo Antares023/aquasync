@@ -9,7 +9,6 @@
   [![Firebase](https://img.shields.io/badge/Firebase-12.0-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
   [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
   [![PWA Ready](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
-  [![License](https://img.shields.io/badge/License-MIT-green.style=for-the-badge)](#license)
 
   <p align="center">
     Aplikasi <b>Progressive Web App (PWA)</b> modern untuk pemantauan tingkat kekeruhan air kolam ikan nila secara real-time (NTU), dilengkapi dengan klasifikasi kejernihan 4 tingkat, kontrol otomatisasi aktuator, proteksi verifikasi email 24-jam & persetujuan admin, serta laporanPDF resmi.
