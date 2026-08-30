@@ -46,23 +46,6 @@
 
 ---
 
-## 🏗️ Arsitektur Alur Autentikasi & Keamanan
-
-```mermaid
-graph TD
-    A["User Registrasi Akun Baru"] --> B["Kirim Email Verifikasi Firebase"]
-    B --> C["Status DB: pending & email_verified: false"]
-    C --> D{"User Klik Link Verifikasi?"}
-    D -- "Tidak (>24 Jam)" --> E["Auto-Cleanup Hapus Akun"]
-    D -- "Ya" --> F["email_verified: true & Status: pending"]
-    F --> G["Halaman PendingState: Menunggu Admin"]
-    G --> H{"Persetujuan Master Admin"}
-    H -- "Tolak" --> I["Hapus Akun & Perangkat"]
-    H -- "Setujui" --> J["Status: approved & Akses Penuh PWA"]
-```
-
----
-
 ## 🛠️ Teknologi & Dependensi
 
 | Kategori | Teknologi | Deskripsi |
