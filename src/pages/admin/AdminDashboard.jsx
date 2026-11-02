@@ -229,7 +229,8 @@ function AdminDashboard({ view = 'dashboard' }) {
                             userDevices.map(([deviceId, devData]) => {
                               const lastUpdated = devData.last_updated || 0;
                               const lastUpdatedMs = lastUpdated < 10000000000 ? lastUpdated * 1000 : lastUpdated;
-                              const isOnline = (currentTime - lastUpdatedMs) <= 60000 && lastUpdated > 0;
+                              const timeDiff = currentTime - lastUpdatedMs;
+                              const isOnline = timeDiff >= 0 && timeDiff <= 60000 && lastUpdated > 0;
                               const sensors = devData.sensor_data || {};
                               const ntu = sensors.ntu || sensors.turbidity || 0;
                               return (
@@ -248,10 +249,14 @@ function AdminDashboard({ view = 'dashboard' }) {
                                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600 }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }}></div> Offline</div>
                                     )}
                                   </div>
-                                  <div style={{ marginBottom: '1rem' }}>
+                                  <div style={{ marginBottom: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                                     <div style={{ background: 'rgba(12, 74, 110, 0.04)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}><Droplets size={14} color="var(--primary)" /><span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Kekeruhan Air (NTU)</span></div>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}><Droplets size={14} color="var(--primary)" /><span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Kekeruhan (NTU)</span></div>
                                       <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>{ntu.toFixed(1)} NTU</div>
+                                    </div>
+                                    <div style={{ background: 'rgba(12, 74, 110, 0.04)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}><span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Tegangan ADC</span></div>
+                                      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'monospace' }}>{sensors.voltage !== undefined ? `${Number(sensors.voltage).toFixed(2)} V` : '-'}</div>
                                     </div>
                                   </div>
                                   <div style={{ display: 'flex', gap: '0.5rem' }}>

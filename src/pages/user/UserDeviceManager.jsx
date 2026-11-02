@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue, set, query, orderByChild, equalTo, get, child, remove } from 'firebase/database';
+import { ref, onValue, set, update, query, orderByChild, equalTo, get, child, remove } from 'firebase/database';
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import Swal from 'sweetalert2';
@@ -55,21 +55,19 @@ function UserDeviceManager() {
         return;
       }
 
-      await set(ref(database, `devices/${newMac}`), {
-        owner_uid: currentUser.uid,
-        name: newName,
-        settings: {
-          target_ntu_min: 0,
-          target_ntu_max: 50,
-          target_temp_min: 24,
-          target_temp_max: 30
-        },
-        controls: {
-          mode: 'auto',
-          pump_pac: false,
-          reset_wifi: false
-        }
-      });
+      const updates = {};
+      updates[`owner_uid`] = currentUser.uid;
+      updates[`name`] = newName;
+      updates[`settings/threshold_jernih`] = 25;
+      updates[`settings/threshold_agak_keruh`] = 45;
+      updates[`settings/threshold_keruh`] = 65;
+      updates[`settings/threshold_sangat_keruh`] = 85;
+      updates[`settings/pac_dosing_duration`] = 5;
+      updates[`controls/mode`] = 'auto';
+      updates[`controls/pump_pac`] = false;
+      updates[`controls/reset_wifi`] = false;
+
+      await update(ref(database, `devices/${newMac}`), updates);
       setShowAddForm(false);
       setNewMac('');
       setNewName('');
@@ -175,9 +173,9 @@ function UserDeviceManager() {
               <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Kode Perangkat (Serial Number)</label>
               <input
                 type="text" required value={newMac} onChange={(e) => setNewMac(e.target.value)}
-                placeholder="misal: AQUASYNC-A1B2"
+                placeholder="misal: AQUASYNC-IDM01"
               />
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>*Lihat kode unik pada stiker di kotak panel alat Anda.</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>*Kode unik perangkat ditampilkan di layar LCD alat saat pertama kali dinyalakan.</div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Nama Alat (Lokasi/Kolam)</label>
@@ -203,7 +201,8 @@ function UserDeviceManager() {
           Object.entries(devices).map(([deviceId, devData]) => {
             const lastUpdated = devData.last_updated || 0;
             const lastUpdatedMs = lastUpdated < 10000000000 ? lastUpdated * 1000 : lastUpdated;
-            const isOnline = (currentTime - lastUpdatedMs) <= 60000 && lastUpdated > 0;
+            const timeDiff = currentTime - lastUpdatedMs;
+            const isOnline = timeDiff >= 0 && timeDiff <= 60000 && lastUpdated > 0;
 
             return (
               <div key={deviceId} className="glass-card" style={{ padding: '1.2rem' }}>

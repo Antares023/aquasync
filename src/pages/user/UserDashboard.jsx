@@ -4,7 +4,8 @@ import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Droplets, Server, AlertTriangle,
-  LayoutDashboard, Activity, CheckCircle2, ShieldAlert
+  LayoutDashboard, Activity, CheckCircle2, ShieldAlert,
+  Beaker, Cpu, Zap, Power
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -28,6 +29,13 @@ function UserDashboard() {
   const [settings, setSettings] = useState(null);
   const [controls, setControls] = useState(null);
   const [historyData, setHistoryData] = useState([]);
+  const [lastUpdated, setLastUpdated] = useState(0);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Fetch User Devices
   useEffect(() => {
@@ -88,11 +96,17 @@ function UserDashboard() {
       }
     });
 
+    const lastUpdatedRef = ref(database, `devices/${selectedDeviceId}/last_updated`);
+    const unsubLastUpdated = onValue(lastUpdatedRef, (snapshot) => {
+      setLastUpdated(snapshot.exists() ? snapshot.val() : 0);
+    });
+
     return () => {
       unsubData();
       unsubSettings();
       unsubControls();
       unsubHistory();
+      unsubLastUpdated();
     };
   }, [selectedDeviceId]);
 
@@ -132,7 +146,7 @@ function UserDashboard() {
         label: 'Sangat Keruh',
         badgeColor: '#ef4444',
         bg: 'rgba(239, 68, 68, 0.1)',
-        desc: `Air sangat keruh (> ${tKeruh} NTU). Perlu dilakukan pengurasan kolam atau filter intensif.`,
+        desc: `Air sangat keruh (≥ ${tKeruh} NTU). Sistem otomatis mengaktifkan pompa dosing PAC.`,
         icon: ShieldAlert
       };
     }
@@ -223,7 +237,13 @@ function UserDashboard() {
   const tJernih = settings?.threshold_jernih ?? 25;
   const tAgakKeruh = settings?.threshold_agak_keruh ?? 45;
   const tKeruh = settings?.threshold_keruh ?? 65;
-  const tSangatKeruh = settings?.threshold_sangat_keruh ?? 85;
+
+  const lastUpdatedMs = lastUpdated < 10000000000 ? lastUpdated * 1000 : lastUpdated;
+  const timeDiff = currentTime - lastUpdatedMs;
+  const isOnline = timeDiff >= 0 && timeDiff <= 60000 && lastUpdated > 0;
+
+  const isPumpActive = controls?.pump_pac === true;
+  const isManualMode = controls?.mode === 'manual';
 
   return (
     <div className="user-dashboard" style={{ paddingBottom: '2rem' }}>
@@ -235,9 +255,9 @@ function UserDashboard() {
         </div>
       ) : (
         <>
-          {/* Active Device Selector & PDF Download */}
-          <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.5rem' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
+          {/* Active Device Selector, Status Online & PDF Download */}
+          <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
               <select
                 className="glass-panel"
                 value={selectedDeviceId}
@@ -254,14 +274,35 @@ function UserDashboard() {
                 <Server size={18} color="var(--primary)" />
               </div>
             </div>
-            <button
-              onClick={handleDownloadPDF}
-              className="btn-3d"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', padding: '0 1rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              <PdfIcon size={18} />
-              <span className="hide-on-mobile">Unduh PDF</span>
-            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{
+                fontSize: '0.75rem',
+                color: isOnline ? '#10b981' : '#ef4444',
+                background: isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                border: `1px solid ${isOnline ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                padding: '0.55rem 0.8rem',
+                borderRadius: 'var(--radius-sm)',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                height: '42px',
+                boxSizing: 'border-box'
+              }}>
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: isOnline ? '#10b981' : '#ef4444' }} />
+                {isOnline ? 'Alat Online' : 'Alat Offline'}
+              </span>
+
+              <button
+                onClick={handleDownloadPDF}
+                className="btn-3d"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', padding: '0 1rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0, height: '42px' }}
+              >
+                <PdfIcon size={18} />
+                <span className="hide-on-mobile">Unduh PDF</span>
+              </button>
+            </div>
           </div>
 
           {/* Real-time NTU Gauge Card (4 Level Classification) */}
@@ -290,7 +331,7 @@ function UserDashboard() {
                 <span>Jernih (≤{tJernih})</span>
                 <span>Agak Keruh ({tAgakKeruh})</span>
                 <span>Keruh ({tKeruh})</span>
-                <span>Sangat Keruh (≥{tSangatKeruh})</span>
+                <span>Sangat Keruh (≥{tKeruh})</span>
               </div>
               <div style={{ width: '100%', height: '10px', background: 'rgba(0,0,0,0.06)', borderRadius: '5px', overflow: 'hidden', position: 'relative' }}>
                 <div
@@ -310,8 +351,8 @@ function UserDashboard() {
             </p>
           </div>
 
-          {/* Indicator Cards Grid */}
-          <div className="dashboard-grid" style={{ marginBottom: '1.5rem', gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          {/* Indicator Cards Grid: NTU & Status */}
+          <div className="dashboard-grid" style={{ marginBottom: '1rem', gridTemplateColumns: 'repeat(2, 1fr)' }}>
             <div className="glass-card-concave" style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Tingkat Kekeruhan Air</span>
@@ -330,6 +371,57 @@ function UserDashboard() {
               <div style={{ fontSize: '1.4rem', fontWeight: 800, color: fuzzyStatus.badgeColor }}>
                 {fuzzyStatus.label}
               </div>
+            </div>
+          </div>
+
+          {/* Actuator & Diagnostic Grid: Pompa PAC & Mode Alat */}
+          <div className="dashboard-grid" style={{ marginBottom: '1.5rem', gridTemplateColumns: 'repeat(2, 1fr)' }}>
+            <div className="glass-card-concave" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Pompa Dosing PAC</span>
+                <Beaker size={16} color={isPumpActive ? '#10b981' : 'var(--text-muted)'} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{
+                  width: '9px',
+                  height: '9px',
+                  borderRadius: '50%',
+                  background: isPumpActive ? '#10b981' : '#94a3b8',
+                  boxShadow: isPumpActive ? '0 0 8px #10b981' : 'none'
+                }} />
+                <span style={{ fontSize: '1.15rem', fontWeight: 800, color: isPumpActive ? '#10b981' : 'var(--text-main)' }}>
+                  {isPumpActive ? 'ON (Menyala)' : 'OFF (Standby)'}
+                </span>
+              </div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                {isManualMode ? 'Kontrol Manual' : 'Histeresis ESP32 (65/45)'}
+              </span>
+            </div>
+
+            <div className="glass-card-concave" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Mode & Tegangan</span>
+                <Cpu size={16} color="var(--primary)" />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '1rem',
+                  background: isManualMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(12, 74, 110, 0.1)',
+                  color: isManualMode ? '#f59e0b' : 'var(--primary)'
+                }}>
+                  {isManualMode ? 'MANUAL' : 'OTOMATIS'}
+                </span>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'monospace' }}>
+                  {data?.voltage !== undefined ? `${Number(data.voltage).toFixed(2)} V` : '-'}
+                </span>
+              </div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                ADC Sensor Turbiditas
+              </span>
             </div>
           </div>
 
